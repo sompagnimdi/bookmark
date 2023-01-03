@@ -1,0 +1,12 @@
+const { Schema, model } = require('mongoose')
+
+const bookmarkSchema = new Schema({
+    title: {type: String, required: true },
+    url: {type: String, require: true}
+}, {
+    timestamps: true
+})
+
+
+module.exports = model('Bookmark', bookmarkSchema)
+
