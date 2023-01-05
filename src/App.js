@@ -1,25 +1,72 @@
-import logo from './logo.svg';
-import './App.css';
+import { useState, useEffect } from "react";
+export default function App(){
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+    const [credentials, setCredentials] = useState({
+        email: '',
+        password: '',
+        name: ''
+    })
+
+    // create bookmarks
+    const [ bookmark, setBookmark ] = useState({
+        title: '',
+        url: '', 
+    })
+    const [token, setToken] = useState('')
+
+    // login
+    const login = async () =>{
+        try {
+            const response = await tech('./api/users/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email: credentials.email, password: credentials.password })
+            })
+            const tokenResponse = await response.json()
+            setToken(tokenResponse)
+            localStorage.setItem('token', JSON.stringify(tokenResponse))
+        } catch (error) {
+            console.error(error)  
+        }
+    }
+    // signUp
+
+    const signUp = async () =>{
+        try {
+            const response = await tech('./api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ ...credentials })
+            })
+            const tokenResponse = await response.json()
+            setToken(tokenResponse)
+            localStorage.setItem('token', JSON.stringify(tokenResponse))
+        } catch (error) {
+            console.error(error)  
+        }
+    }
+
+    const createBookmark = async() => {
+        try {
+            const response = await fetch('./api/boomarks', {
+                method: 'POST',
+                headers:{
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                }
+            })
+        } catch (error) {
+            
+        }
+    }
+
+    return(
+        <>
+        <h1>Hello World</h1>
+        </>
+    )
 }
-
-export default App;

@@ -42,7 +42,7 @@ const createBookmark = async (req, res, next) => {
     }
 }
 
-const respondWithBookmark = (res, res) => {
+const respondWithBookmark = (req, res) => {
     res.json(res.locals.data.bookmark)
 }
 
