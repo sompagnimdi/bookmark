@@ -1,4 +1,9 @@
 import { useState, useEffect } from "react";
+import Auth from "./components/Auth/Auth";
+import CreateBookmark from "./components/CreateBookmark/CreateBookmark";
+import BookmarkList from "./components/BookmarkList/BookmarList";
+
+
 export default function App(){
 
     /*
@@ -108,7 +113,7 @@ export default function App(){
             })
             const data = await response.json()
             const bookmarksCopy = [...bookmarks]
-            const index = bookmarksCopy.findIndex( bookmark => id === bookmark.id )
+            const index = bookmarksCopy.findIndex( bookmark => id === bookmark._id )
             bookmarksCopy.slice(index, 1)
             setBookmarks(bookmarksCopy)
         } catch (error) {
@@ -128,7 +133,7 @@ export default function App(){
             })
             const data = await response.json()
             const bookmarksCopy = [...bookmarks]
-            const index = bookmarksCopy.findIndex( bookmark => id === bookmark.id )
+            const index = bookmarksCopy.findIndex( bookmark => id === bookmark._id )
             bookmarksCopy[index] = {...bookmarksCopy[index], ...updateData}
             setBookmarks(bookmarksCopy)
         } catch (error) {
@@ -154,43 +159,23 @@ export default function App(){
 
     return(
         <>
-        <h2>Login</h2>
-        <form onSubmit={(e) => {
-            e.preventDefault()
-            login()
-        }}>
-            <input type="text" value={credential.email} name= "email" onChange={handleChangeAuth} placeholder={'Email Here'}></input>
-            <input type="password" value={credential.password} name="password" onChange={handleChangeAuth} placeholder={'Password'}></input>
-            <input type="submit" value="Login as an Existing User"/>
-        </form >
-        <h2>SignUp</h2>
-        <form  onSubmit={(e) => {
-            e.preventDefault()
-            signUp()
-        }}>
-            <input type="text" value={credential.email} name= "email" onChange={handleChangeAuth} placeholder={'Email'}></input>
-            <input type="name" value={credential.name} name="name" onChange={handleChangeAuth} placeholder={'Name'}></input>
-            <input type="password" value={credential.password} name="password" onChange={handleChangeAuth} placeholder={'Password'}></input>
-            <input type="submit" value="Sign Up as a New User"/>
-        </form>
-        <h2>Create A BookMarks</h2>
-        <form onSubmit={(e) => {
-            e.preventDefault()
-            createBookmark()
-        }}>
-            <input type="text" value={bookmark.title} name="title" onChange={handleChange} placeholder={'Title'}></input>
-            <input type="text" value={credential.url} name="url" onChange={handleChange} placeholder={'Url'}></input>
-            <input type="submit" value="Create Bookmark"/>
-        </form>
-        <ul>
-            {bookmarks.length ? bookmarks.map(item =>(
-                <li key={item._id}>
-                    <h4>{item.title}</h4>
-                    <a href={item.url} target="_blank"> {url}</a>
-                </li>
-            )): <>No BookMarks Added</>}
-        </ul>
-        
-        </>
+        <Auth
+        login={login}
+        credentials={credentials}
+        handleChange={handleChangeAuth}
+        signUp={signUp}
+        />
+        <CreateBookmark
+        createBookmark={createBookmark}
+        bookmark={bookmark}
+        handleChange={handleChange}
+        />
+        <BookmarkList
+        bookmarks={bookmarks}
+        DeleteBookmark={DeleteBookmark}
+        UpdateBookmark={UpdateBookmark}
+        />
+    </>
     )
 }
+
