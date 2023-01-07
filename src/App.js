@@ -3,7 +3,6 @@ import Auth from "./components/Auth/Auth";
 import CreateBookmark from "./components/CreateBookmark/CreateBookmark";
 import BookmarkList from "./components/BookmarkList/BookmarList";
 
-
 export default function App(){
 
     /*
@@ -27,10 +26,8 @@ export default function App(){
     })
     const [bookmarks, setBookmarks] = useState([])
 
-
     const [token, setToken] = useState('')
 
-    
     const login = async () =>{
         try {
             const response = await tech('./api/users/login', {
@@ -45,10 +42,11 @@ export default function App(){
             localStorage.setItem('token', JSON.stringify(tokenResponse))
         } catch (error) {
             console.error(error)  
+        } finally {
+            window.location.reload()
         }
     }
     
-
     const signUp = async () =>{
         try {
             const response = await tech('./api/users', {
@@ -63,6 +61,8 @@ export default function App(){
             localStorage.setItem('token', JSON.stringify(tokenResponse))
         } catch (error) {
             console.error(error)  
+        } finally {
+            window.location.reload()
         }
     }
 
@@ -140,30 +140,38 @@ export default function App(){
             console.error(error)
         }
     }
-
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (tokenData && tokenData !== 'null' && tokenData !== 'undefined'){
             ListBookmarsByUser()
-        }
-       
+        }   
     }, [])
-
     useEffect(() => {
         const token = localStorage.getItem('token')
         if (tokenData && tokenData !== 'null' && tokenData !== 'undefined'){
             setToken(JSON.parse(tokenData))
         }
-       
     }, [])
-
     return(
         <>
+        {
+            token ?
+            <button onClick={() => {
+                localStorage.removeItem('token')
+                window.location.reload()
+    
+            }}>
+                Logout
+            </button>:
+            ''
+        }
+       
         <Auth
         login={login}
         credentials={credentials}
         handleChange={handleChangeAuth}
         signUp={signUp}
+        setToken={setToken}
         />
         <CreateBookmark
         createBookmark={createBookmark}
