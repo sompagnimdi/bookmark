@@ -1,189 +1,168 @@
-import { useState, useEffect } from "react";
-import Auth from "./components/Auth/Auth";
-import CreateBookmark from "./components/CreateBookmark/CreateBookmark";
-import BookmarkList from "./components/BookmarkList/BookmarList";
+import { useState, useEffect } from 'react'
+import Auth from './components/Auth/Auth'
+import CreateBookmark from './components/CreateBookmark/CreateBookmark'
+import BookmarkList from './components/BookmarkList/BookmarkList'
 
-export default function App(){
+export default function App () {
+  /*
+    Login, SignUp, CreateBookmark, ListBookmarksByUser, DeleteBookmark, UpdateBookmark
+    */
 
-    /*
-    Login, SignUp, CreateBookmark ListBookmarsByUser, DeleteBookmark, UpdateBookmark */
+  const handleChangeAuth = (event) => {
+    setCredentials({ ...credentials, [event.target.name]: event.target.value })
+  }
+  const handleChange = (event) => {
+    setBookmark({ ...bookmark, [event.target.name]: event.target.value })
+  }
+  const [credentials, setCredentials] = useState({
+    email: '',
+    password: '',
+    name: ''
+  })
+  const [bookmark, setBookmark] = useState({
+    title: '',
+    url: ''
+  })
+  const [bookmarks, setBookmarks] = useState([])
 
-    const handleChangeAuth = (event) => {
-        setCredentials({...bookmark, [event.target.name]:: event.target.value })
+  const [token, setToken] = useState('')
+  const login = async () => {
+    try {
+      const response = await fetch('/api/users/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email: credentials.email, password: credentials.password })
+      })
+      const tokenResponse = await response.json()
+      setToken(tokenResponse)
+      localStorage.setItem('token', JSON.stringify(tokenResponse))
+    } catch (error) {
+      console.error(error)
     }
-    const handleChange = (event) => {
-        setBookmark({...bookmark, [event.target.name]: event.target.value })
+  }
+  const signUp = async () => {
+    try {
+      const response = await fetch('/api/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ...credentials })
+      })
+      const tokenResponse = await response.json()
+      setToken(tokenResponse)
+      localStorage.setItem('token', JSON.stringify(tokenResponse))
+    } catch (error) {
+      console.error(error)
     }
-    const [credentials, setCredentials] = useState({
-        email: '',
-        password: '',
-        name: ''
-    })
-
-    const [bookmark, setBookmark] = useState({
+  }
+  const createBookmark = async () => {
+    try {
+      const response = await fetch('/api/bookmarks', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ ...bookmark })
+      })
+      const data = await response.json()
+      setBookmarks([data, ...bookmarks])
+    } catch (error) {
+      console.error(error)
+    } finally {
+      setBookmark({
         title: '',
-        url: '', 
-    })
-    const [bookmarks, setBookmarks] = useState([])
+        url: ''
+      })
+    }
+  }
+  const listBookmarksByUser = async () => {
+    try {
+      const response = await fetch('/api/users/bookmarks', {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${JSON.parse(localStorage.getItem('token'))}`
+        }
+      })
+      const data = await response.json()
+      setBookmarks(data)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  const deleteBookmark = async (id) => {
+    try {
+      const response = await fetch(`/api/bookmarks/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        }
+      })
+      const data = await response.json()
+      const bookmarksCopy = [...bookmarks]
+      const index = bookmarksCopy.findIndex(bookmark => id === bookmark._id)
+      bookmarksCopy.splice(index, 1)
+      setBookmarks(bookmarksCopy)
+    } catch (error) {
+      console.error(error)
+    }
+  }
+  const updateBookmark = async (id, updatedData) => {
+    try {
+      const response = await fetch(`/api/bookmarks/${id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify(updatedData)
+      })
+      const data = await response.json()
+      const bookmarksCopy = [...bookmarks]
+      const index = bookmarksCopy.findIndex(bookmark => id === bookmark._id)
+      bookmarksCopy[index] = { ...bookmarksCopy[index], ...updatedData }
+      setBookmarks(bookmarksCopy)
+    } catch (error) {
+      console.error(error)
+    }
+  }
 
-    const [token, setToken] = useState('')
+  useEffect(() => {
+    const tokenData = localStorage.getItem('token')
+    if (tokenData && tokenData !== 'null' && tokenData !== 'undefined') {
+      listBookmarksByUser()
+    }
+  }, [])
 
-    const login = async () =>{
-        try {
-            const response = await tech('./api/users/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email: credentials.email, password: credentials.password })
-            })
-            const tokenResponse = await response.json()
-            setToken(tokenResponse)
-            localStorage.setItem('token', JSON.stringify(tokenResponse))
-        } catch (error) {
-            console.error(error)  
-        } finally {
-            window.location.reload()
-        }
+  useEffect(() => {
+    const tokenData = localStorage.getItem('token')
+    if (tokenData && tokenData !== 'null' && tokenData !== 'undefined') {
+      setToken(JSON.parse(tokenData))
     }
-    
-    const signUp = async () =>{
-        try {
-            const response = await tech('./api/users', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ ...credentials })
-            })
-            const tokenResponse = await response.json()
-            setToken(tokenResponse)
-            localStorage.setItem('token', JSON.stringify(tokenResponse))
-        } catch (error) {
-            console.error(error)  
-        } finally {
-            window.location.reload()
-        }
-    }
-
-    const createBookmark = async() => {
-        try {
-            const response = await fetch('./api/boomarks', {
-                method: 'POST',
-                headers:{
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(...bookmark)
-            })
-            const data = await response.json()
-            setBookmarks([data, ...bookmarks])
-        } catch (error) {
-            console.error(error)
-        } finally {
-            setBookmark({
-                title: '',
-                url: ''
-        })
-        }
-    }
-    const ListBookmarsByUser = async () => {
-        try {
-            const response = await tech('/api/users/bookmarks', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${JSON.parse(localStorage.getItem('token'))}`
-                }
-            })
-            const data = await response.json()
-            setBookmarks(data)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-    const DeleteBookmark = async(id) => {
-        try {
-            const response = await tech(`/api/bookmarks/${id}`, {
-                method: 'DELETE',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                }
-            })
-            const data = await response.json()
-            const bookmarksCopy = [...bookmarks]
-            const index = bookmarksCopy.findIndex( bookmark => id === bookmark._id )
-            bookmarksCopy.slice(index, 1)
-            setBookmarks(bookmarksCopy)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-
-    const UpdateBookmark = async(id, updateData) => {
-        try {
-            const response = await tech(`/api/bookmarks/${id}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify(updateData)
-            })
-            const data = await response.json()
-            const bookmarksCopy = [...bookmarks]
-            const index = bookmarksCopy.findIndex( bookmark => id === bookmark._id )
-            bookmarksCopy[index] = {...bookmarksCopy[index], ...updateData}
-            setBookmarks(bookmarksCopy)
-        } catch (error) {
-            console.error(error)
-        }
-    }
-    useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (tokenData && tokenData !== 'null' && tokenData !== 'undefined'){
-            ListBookmarsByUser()
-        }   
-    }, [])
-    useEffect(() => {
-        const token = localStorage.getItem('token')
-        if (tokenData && tokenData !== 'null' && tokenData !== 'undefined'){
-            setToken(JSON.parse(tokenData))
-        }
-    }, [])
-    return(
-        <>
-        {
-            token ?
-            <button onClick={() => {
-                localStorage.removeItem('token')
-                window.location.reload()
-    
-            }}>
-                Logout
-            </button>:
-            ''
-        }
-       
-        <Auth
+  }, [])
+  return (
+    <>
+      <Auth
         login={login}
         credentials={credentials}
-        handleChange={handleChangeAuth}
+        handleChangeAuth={handleChangeAuth}
         signUp={signUp}
-        setToken={setToken}
-        />
-        <CreateBookmark
+      />
+      <CreateBookmark
         createBookmark={createBookmark}
         bookmark={bookmark}
         handleChange={handleChange}
-        />
-        <BookmarkList
+      />
+      <BookmarkList
         bookmarks={bookmarks}
-        DeleteBookmark={DeleteBookmark}
-        UpdateBookmark={UpdateBookmark}
-        />
+        deleteBookmark={deleteBookmark}
+        updateBookmark={updateBookmark}
+      />
     </>
-    )
+  )
 }
-

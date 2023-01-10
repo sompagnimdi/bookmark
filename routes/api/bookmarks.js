@@ -1,23 +1,24 @@
 const router = require('express').Router()
 const bookmarkCtrl = require('../../controllers/api/bookmarks')
 const checkToken = require('../../config/checkToken')
-const ensureLoogedIn = require('../../config/ensureLoggedin')
-
-
-/* /api/bookmark/:id
-Delete
-destroy bookmark */
-router.delete('/:id', checkToken, ensureLoogedIn, bookmarkCtrl.updateBookmark, bookmarkCtrl.respondWithBookmark)
-
+const ensureLoggedIn = require('../../config/ensureLoggedIn')
 
 /* /api/bookmarks/:id
-Put update bookmark*/
-router.put('/:id', checkToken, ensureLoogedIn, bookmarkCtrl.updateBookmark, bookmarkCtrl.respondWithBookmark)
-
-
-/* /api/bookmark 
-Post creat bookmark */
-router.post('/', checkToken, ensureLoogedIn, bookmarkCtrl.createBookmark, bookmarkCtrl.respondWithBookmark)
-
+DELETE
+destroy bookmark
+*/
+router.delete('/:id', checkToken, ensureLoggedIn, bookmarkCtrl.destroyBookmark, bookmarkCtrl.respondWithBookmark)
+/*
+/api/bookmarks/:id
+PUT
+update bookmark
+*/
+router.put('/:id', checkToken, ensureLoggedIn, bookmarkCtrl.updateBookmark, bookmarkCtrl.respondWithBookmark)
+/*
+/api/bookmarks
+POST
+create bookmark
+*/
+router.post('/', checkToken, ensureLoggedIn, bookmarkCtrl.createBookmark, bookmarkCtrl.respondWithBookmark)
 
 module.exports = router
